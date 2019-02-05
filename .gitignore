@@ -1,0 +1,7 @@
+# Mac turds
+.DS_Store
+/.metadata/
+/.recommenders/
+
+# Don't want Redis database dumps.
+dump.rdb

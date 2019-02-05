@@ -1,0 +1,149 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>hugbunadar_verkefni_hopur_1_veryWowchat</groupId>
+	<artifactId>Very_Wow_Chat</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>Very_Wow_Chat</name>
+
+	<!-- Don't touch or remove. This comes with the project when initialized 
+		with Spring Initializr. This POM file inherits plug-ins, dependencies, and 
+		etc. that are found in this parent POM. -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.5.RELEASE</version>
+	</parent>
+
+	<!-- It's very stupid but there are some compile errors that tell you this 
+		is a java 1.8 or higher feature, so make it so that this app can only be 
+		used with java 1.8 or higher -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<!-- Guys Put all ur shit here you can use https://mvnrepository.com/ to 
+		find stuff that you need but try also looking if the stuff you need is supported 
+		by spring-boot themselfs and not some random guys -->
+	<dependencies>
+
+		<!-- !!!!!!!!!!!!!!IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!! This one is responsible 
+			for fetching ALL the Restfull stuff that we need to make a restfull app -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Redis will be used to store user info in temporary mode before user 
+			validates it -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		
+        <!-- Trying things out! -->
+        <!-- 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+         -->
+
+		<!-- Redis Java client. -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<type>jar</type>
+		</dependency>
+
+		<!-- This is a security pack used to implement various security features 
+			and is the core of our security configs file if you are experiancing somekind 
+			of denied errors double check that this dependency is installed in Maven 
+			Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- JSON Web Token support for the JVM. Used to create JSON Web Tokens 
+			for user authentication. -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.6.0</version>
+		</dependency>
+
+		<!-- Provides building blocks for both client side validation and server 
+			side data validation. We use it for client side data validation, e.g. email 
+			validations and etc. -->
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.4.1</version>
+		</dependency>
+
+		<!-- Neo4j stuff that's supported by Spring Boot. You might see that the 
+			version is not needed, but sometimes vilhelm gets compile errors if he dosen't 
+			add version, so please don't remove just set to ignore. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-neo4j</artifactId>
+			<version>2.0.6.RELEASE</version><!--$NO-MVN-MAN-VER$ -->
+		</dependency>
+
+		<!-- JSON in Java. We use it to create JSON objects. -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180130</version>
+		</dependency>
+
+		<!-- Support for WebSockets. This is so that a bidirectional channel can 
+			be established between the server and a client, allowing the server to send 
+			messages to the client any time the channel is up. E.g. so the server can 
+			send clients notifications when new messages have been sent to a chat room 
+			they're a member of. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<!-- Support for MongoDB. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<!-- Don't touch this and don't remove this. This comes with the project 
+		when it's generated by Spring Initializr. -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

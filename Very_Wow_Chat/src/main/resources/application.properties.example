@@ -1,0 +1,44 @@
+# Server port
+server.port=9090
+
+
+# neo4j
+spring.data.neo4j.uri=bolt://localhost
+spring.data.neo4j.username=neo4j
+spring.data.neo4j.password=Pass.3219
+
+
+# MongoDB
+spring.data.mongodb.uri=mongodb://localhost
+spring.data.mongodb.database=very_wow_chat
+# spring.data.mongodb.username=
+# spring.data.mongodb.password=
+
+# Get some debugging info.
+# logging.level.root = debug
+
+# Temporarily disable security in its entirety.  
+# security.ignored=/**
+
+cryptography.security.password=mydicktasteslikelemons
+
+cryptography.storage.password=?wp^]JKi`j?=zUKr[q&-TR:L@?\5A_#:)QEsV9ksTX$v`jl@]bB;S-hiIQOoCE,s
+# Hey there salty sailor.
+cryptography.storage.salt=340b27a1041abff9
+
+
+# https://hugbomailserver.herokuapp.com/
+email.server.serverRunningOn=http://localhost:3000/
+email.server.url=https://hugbomailserver.herokuapp.com/
+email.server.secretkey=VeryStrongPassword
+
+
+
+# logging.level.root=info
+# log4j.category.org.springframework.data.neo4j=WARN
+# log4j.category.org.springframework.data.neo4j.support.query=WARN
+# log4j.category.org.springframework.data.neo4j=ERROR
+
+# disable logs
+logging.level.org.neo4j.ogm.drivers.bolt.request.BoltRequest=WARN
+
