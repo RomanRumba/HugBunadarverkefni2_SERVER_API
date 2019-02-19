@@ -1,4 +1,4 @@
-# Hugbúnaðarverkefni 1: Very Wow Chat
+# Hugbúnaðarverkefni 2: Very Wow Chat (Server)
 
 A chat room application.
 
