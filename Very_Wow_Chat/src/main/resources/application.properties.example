@@ -42,3 +42,6 @@ email.server.secretkey=VeryStrongPassword
 # disable logs
 logging.level.org.neo4j.ogm.drivers.bolt.request.BoltRequest=WARN
 
+
+# Uploaded files
+content.directory = /path/to/folder/to/place/uploaded/stuff
