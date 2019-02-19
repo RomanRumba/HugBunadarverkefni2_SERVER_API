@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import project.errors.NotFoundException;
 import project.persistance.entities.Chatroom;
 import project.services.ChatroomService;
-import project.services.StorageService;
 import project.services.UserService;
 
 import java.util.Random;
@@ -40,9 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/auth/res")
 public class FileUploadController {
-
-	@Autowired
-	private StorageService storageService;
 	
 	@Autowired
 	private ChatroomService chatroomService;
