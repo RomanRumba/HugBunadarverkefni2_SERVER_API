@@ -158,7 +158,9 @@ public class ChatroomController {
 			// create the chatroom
 			chatroomService.createChatroom(user, chatroom);
 			// add the tags to the chatroom
-			this.tagService.setTags(chatroom, newChatroom.getTags());
+			if(newChatroom.getTags() != null) {
+				this.tagService.setTags(chatroom, newChatroom.getTags());				
+			}
 			// prepare membership for return
 			Membership membership = this.chatroomService.getUserMembershipOfChatroom(user, chatroom);
 			// wrap the data to send in json format
@@ -509,7 +511,7 @@ public class ChatroomController {
 	 * @return
 	 */
 	@RequestMapping(path = "/{chatroomName}/tags", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<Object> getChatroomTags(@PathVariable String chatroomName) {
+	public ResponseEntity<Object> getChatroomTags(UsernamePasswordAuthenticationToken token, @PathVariable String chatroomName) {
 		try {
 			// fetch the chatroom
 			Chatroom chatroom = this.chatroomService.findByChatname(chatroomName);
@@ -530,7 +532,7 @@ public class ChatroomController {
 	 * @return
 	 */
 	@RequestMapping(path = "/tag/{tagName}", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<Object> getListedChatroomsWithTag(@PathVariable String tagName) {
+	public ResponseEntity<Object> getListedChatroomsWithTag(UsernamePasswordAuthenticationToken token, @PathVariable String tagName) {
 		// fetch the chatroom
 		List<Chatroom> chatrooms = this.tagService.findListedChatroomsWithTag(tagName);
 
@@ -538,6 +540,50 @@ public class ChatroomController {
 		List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
 
 		return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+	}
+
+	/**
+	 * 
+	 * @param tagName
+	 * @return
+	 */
+	@RequestMapping(path = "/search/listed/{searchTerm}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> searchListedChatroom(UsernamePasswordAuthenticationToken token, @PathVariable String searchTerm) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			// fetch the chatroom
+			List<Chatroom> chatrooms = this.chatroomService.listedChatroomSearch(searchTerm, user);
+	
+			// create a list of ChatroomResponders for json return
+			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
+	
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
+
+	/**
+	 * 
+	 * @param tagName
+	 * @return
+	 */
+	@RequestMapping(path = "/search/all/{searchTerm}", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> searchAllChatroom(UsernamePasswordAuthenticationToken token, @PathVariable String searchTerm) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			// fetch the chatroom
+			List<Chatroom> chatrooms = this.chatroomService.allChatroomSearch(searchTerm, user);
+	
+			// create a list of ChatroomResponders for json return
+			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
+	
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
 	}
 
 	/**
