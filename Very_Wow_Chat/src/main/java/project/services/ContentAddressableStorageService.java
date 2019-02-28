@@ -54,19 +54,21 @@ public class ContentAddressableStorageService {
 		return false;
 	}
 	
+	
 	/**
 	 * 
-	 * 
 	 * @param hash
-	 * @param servletOutputStream
-	 * @throws IOException 
+	 * @param httpServletResponse
+	 * @return
+	 * @throws IOException
 	 */
-	public void fetchAsHttpServletResponse(String hash, HttpServletResponse httpServletResponse) throws IOException {
+	public boolean fetchAsHttpServletResponse(String hash, HttpServletResponse httpServletResponse) throws IOException {
 		boolean success = fetchAsServletOutputStream(hash, httpServletResponse.getOutputStream());
 		if (!success) {
 			httpServletResponse.sendError(404, "Resource not found");
 		}
 		httpServletResponse.flushBuffer();
+		return success;
 	}
 	
 	

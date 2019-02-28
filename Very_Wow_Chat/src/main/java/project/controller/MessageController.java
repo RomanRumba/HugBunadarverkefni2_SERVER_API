@@ -1,15 +1,26 @@
 package project.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -57,9 +69,12 @@ public class MessageController {
 
 	@Autowired
 	protected UserService userService;
-	
+
 	@Autowired
 	protected ContentAddressableStorageService cass;
+	
+	@Value("${content.directory}")
+	private String fileDirectory;
 
 	/**
 	 * Returns all messages of chat room `chatroomName`.
@@ -257,28 +272,127 @@ public class MessageController {
 			return e.getErrorResponseEntity();
 		}
 	}
-	
+
 	@RequestMapping(path = "/{chatroomName}/message/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<Object> getChatMessage(@PathVariable String chatroomName, @PathVariable String id,
 			UsernamePasswordAuthenticationToken token) {
 		try {
 			User user = userService.findByUsername(token.getName());
 			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
-			
+
 			if (!chatroomService.isMember(user, chatroom)) {
 				return new ResponseEntity<>(ResponseWrapper.badWrap("You don't have access to this chat room."),
 						HttpStatus.UNAUTHORIZED);
 			}
-			
+
 			// TODO: implement get chat message by id
-			
-			
+
 			return new ResponseEntity<>(ResponseWrapper.wrap(0), HttpStatus.OK);
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			return e.getErrorResponseEntity();
-		}		
+		}
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@RequestMapping(path = "/{chatroomName}/message/{id}/{res}", method = RequestMethod.GET, headers = "Accept=*/*")
+	public void getResourceByHashAndId(@PathVariable String chatroomName, @PathVariable String id,
+			@PathVariable String res, UsernamePasswordAuthenticationToken token, HttpServletResponse httpServletResponse) {
+		
+		String hash = res;
+		
+		System.out.println("id: " + id);
+		System.out.println("hash: " + hash);
+		
+		
+		
+		try {
+			// Find user name based off of JWT token.
+			User user = userService.findByUsername(token.getName());
+			
+			// Get chat room from chat room name.
+			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
+			
+			if (!chatroomService.isMember(user, chatroom)) {
+				httpServletResponse.sendError(404, "Unauthorized");
+				httpServletResponse.flushBuffer();
+				System.err.println("User isn't member of chatroom");
+				return;
+			}
+			
+			ChatMessage chatMessage = messageService.getChatMessage(chatroom, id);
+			
+			List<String> resources = chatMessage.getResources();
+			
+			
+			if (!resources.contains(hash)) {
+				httpServletResponse.sendError(404, "Unauthorized");
+				httpServletResponse.flushBuffer();
+				System.err.println("Hash doesn't exist");
+				return;
+			}
+			
+			String path = Paths.get(fileDirectory, hash).toString();
+			
+			
+			
+			File file = new File(path);
+			
+			InputStream is = new FileInputStream(file);
+			
+			// TODO: check if file exists
+			
+			
+		    
+		    // TODO: maybe reintroduce later
+		    if (false) {
+		    	Tika tika = new Tika();
+			    String mimeType = tika.detect(file);
+				
+				//String mimeType = Files.probeContentType(file.toPath());
+				httpServletResponse.addHeader("Content-Type", mimeType);
+				System.out.println("MimeType: " + mimeType);
+		    }
+			
+			
+			
+			ServletOutputStream servletOutputStream = httpServletResponse.getOutputStream();
+			
+			boolean success = false;
+			
+			
+			if (file.exists()) {
+				
+				
+				
+				
+			    // copy it to response's OutputStream
+				IOUtils.copy(is, servletOutputStream);
+				success = true;
+			}
+			
+			
+			
+			
+			if (!success) {
+				httpServletResponse.sendError(404, "Resource not found");
+			}
+			httpServletResponse.flushBuffer();
+			
+		} catch (NotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+
+		
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Sends a message at chat room `chatroomName`.
@@ -295,7 +409,7 @@ public class MessageController {
 	 * 
 	 * @return Posts a chat message.
 	 */
-	@RequestMapping(path = "/{chatroomName}/message", method = RequestMethod.POST, headers = "Accept=application/json")
+	@RequestMapping(path = "/{chatroomName}/messageold", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<Object> addChatMessage(@PathVariable String chatroomName,
 			@RequestBody MessageRequest chatMessageRequest, UsernamePasswordAuthenticationToken token) {
 		try {
@@ -343,17 +457,17 @@ public class MessageController {
 	 * 
 	 * @return Posts a chat message.
 	 */
-	@RequestMapping(path = "/{chatroomName}/message2", method = RequestMethod.POST, headers = "Accept=application/json")
+	@RequestMapping(path = "/{chatroomName}/message", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<Object> addChatMessage2(@PathVariable String chatroomName,
 			@RequestBody String chatMessageJsonString, UsernamePasswordAuthenticationToken token) {
 		try {
-			// TODO: fix HttpStatus 
-			
+			// TODO: fix HttpStatus
+
 			JsonArray badMessage = new JsonArray();
 
 			// Find user name based off of JWT token.
 			User user = userService.findByUsername(token.getName());
-			
+
 			// Get chat room from chat room name.
 			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
 
@@ -367,93 +481,90 @@ public class MessageController {
 			Gson gson = new Gson();
 			// TODO: this might fail... I don't care.
 			JsonObject chatMessage = gson.fromJson(chatMessageJsonString, JsonObject.class);
-			
+
 			if (!chatMessage.has("message")) {
 				badMessage.add("JSON missing \"message\" property.");
-				return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+				return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.BAD_REQUEST);
 			}
-			
+
 			JsonElement mje = chatMessage.get("message");
-			
+
 			if (!mje.isJsonPrimitive()) {
 				badMessage.add("JSON \"message\" must be a string");
-				return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+				return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.BAD_REQUEST);
 			}
-			
+
 			String message = mje.getAsString();
 			List<String> resourcesAL = new ArrayList<>();
-			
+
 			// Check if JSON request had attachments.
 			if (chatMessage.has("attachments")) {
-				
+
 				JsonElement attachmentsje = chatMessage.get("attachments");
-				
+
 				if (!attachmentsje.isJsonArray()) {
 					badMessage.add("Attachments must be an array");
-					return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+					return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
+							HttpStatus.BAD_REQUEST);
 				}
-				
+
 				JsonArray attachmentsja = attachmentsje.getAsJsonArray();
-				
-				// TODO: I'd ideally want to check whether attachments are correctly formatted before saving
-				
+
+				// TODO: I'd ideally want to check whether attachments are correctly formatted
+				// before saving
+
 				for (JsonElement attachmentje : attachmentsja) {
-					
+
 					if (!attachmentje.isJsonObject()) {
 						badMessage.add("Each attachment must be a JSON object.");
-						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
+								HttpStatus.BAD_REQUEST);
 					}
-					
+
 					JsonObject attachmentjo = attachmentje.getAsJsonObject();
-					
+
 					if (!attachmentjo.has("type")) {
 						badMessage.add("Each attachment specificy what type it is, e.g. base64file");
-						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
+								HttpStatus.BAD_REQUEST);
 					}
-					
+
 					String type = attachmentjo.get("type").getAsString();
-					
-					
+
 					if (type.equals("base64file")) {
-						
+
 						if (!attachmentjo.has("value")) {
 							badMessage.add("base64file attachment MUST have a value property");
-							return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+							return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
+									HttpStatus.BAD_REQUEST);
 						}
-						
+
 						String value = attachmentjo.get("value").getAsString();
-						
+
 						byte[] valueBytes = DatatypeConverter.parseBase64Binary(value);
-						
+
 						String hex = cass.storeBytes(valueBytes);
 						resourcesAL.add(hex);
-						
+
 					} else {
 						System.out.println("Unknown type: " + type);
 						badMessage.add("Unknown type for attachment: " + type);
-						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.UNAUTHORIZED);
+						return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
+								HttpStatus.BAD_REQUEST);
 					}
 				}
 			}
-			
+
 			long timestamp = System.currentTimeMillis();
-			
+
 			String[] resources = resourcesAL.toArray(new String[resourcesAL.size()]);
-			
+
 			if (resources.length == 0) {
 				resources = null;
 			}
-			
-			
-			ChatMessage cm = new ChatMessage(
-					null, 
-					chatroomName, 
-					user.getId(), 
-					user.getUsername(),
-					 user.getDisplayName(),
-					 CryptographyService.getCiphertext(message), 
-					 timestamp, 
-					 resourcesAL);
+
+			ChatMessage cm = new ChatMessage(null, chatroomName, user.getId(), user.getUsername(),
+					user.getDisplayName(), CryptographyService.getCiphertext(message), timestamp, resourcesAL);
 			messageService.addChatMessage(cm);
 			chatroomService.updateLastMessageReceived(chatroomName);
 
@@ -501,6 +612,7 @@ public class MessageController {
 	 * @param chatroomName       Name of chat room.
 	 * @param chatMessageRequest The message that is being sent.
 	 * @param token              User name and password authentication token.
+	 * @deprecated
 	 * 
 	 * @return Posts a chat message.
 	 */

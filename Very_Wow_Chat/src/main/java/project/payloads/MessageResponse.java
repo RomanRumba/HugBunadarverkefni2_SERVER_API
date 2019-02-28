@@ -1,5 +1,6 @@
 package project.payloads;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import project.persistance.entities.ChatMessage;
@@ -125,7 +126,7 @@ public class MessageResponse {
 	public MessageResponse(String id, String chatroomName, long senderUsernameId, String senderUsername,
 			String senderDisplayName, String message, long timestamp) {
 		this(id,  chatroomName,  senderUsernameId,  senderUsername,
-			 senderDisplayName,  message,  timestamp, null);
+			 senderDisplayName,  message,  timestamp, new ArrayList<String>());
 	}
 
 	/**
