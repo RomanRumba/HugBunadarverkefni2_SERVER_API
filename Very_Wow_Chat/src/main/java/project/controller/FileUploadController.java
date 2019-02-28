@@ -32,6 +32,13 @@ import project.persistance.entities.Chatroom;
 import project.services.ChatroomService;
 import project.services.UserService;
 
+/**
+ * NOTE: this is only temporary. DO NOT USE IN PRODUCTION!
+ * 
+ * 
+ * @author david
+ *
+ */
 @RestController
 @RequestMapping("/auth/res")
 public class FileUploadController {
