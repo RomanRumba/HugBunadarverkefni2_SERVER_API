@@ -1,7 +1,9 @@
 package project.services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import project.errors.NotFoundException;
 import project.errors.UnauthorizedException;
 import project.persistance.entities.Chatroom;
 import project.persistance.entities.Membership;
+import project.persistance.entities.Tag;
 import project.persistance.entities.User;
 import project.persistance.repositories.ChatroomRepository;
 // import project.persistance.repositories.TagRepository;
@@ -80,6 +83,62 @@ public class ChatroomService {
 		Chatroom chatroom = this.chatroomRepository.findByChatroomName(chatroomName);
 
 		return chatroom;
+	}
+	
+	/**
+	 * returns all listed chatroom whose tag or displayName match the search term and user is not a member of
+	 * @param searchTerm the search term
+	 * @return
+	 */
+	public List<Chatroom> listedChatroomSearch(String searchTerm, User user) {
+		List<Chatroom> chatrooms = this.chatroomRepository.findByListed(true);
+		
+		// remove chatrooms user is member of
+		chatrooms.removeIf(x -> this.isMember(user, x));
+		
+		// filter the chatrooms with regards to the searchterm
+		return this.filterChatrooms(chatrooms, searchTerm);
+	}
+	
+	/**
+	 * returns all chatroom whose tag or displayName match the search term and user is not a member of
+	 * @param searchTerm the search term
+	 * @return
+	 */
+	public List<Chatroom> allChatroomSearch(String searchTerm, User user) {
+		List<Chatroom> chatrooms = this.chatroomRepository.findAll();
+
+		// remove chatrooms user is member of
+		chatrooms.removeIf(x -> this.isMember(user, x));
+		
+		return this.filterChatrooms(chatrooms, searchTerm);
+	}
+	
+	/**
+	 * #TODO: ekki hægt að senda íslenska stafi sem url
+	 * Filters a list of chatrooms
+	 * chatrooms with tags or displayName matching the searchTerm will not be removed
+	 * @param chatrooms
+	 * @param searchTerm
+	 * @return a new filtered list of chatrooms
+	 */
+	private List<Chatroom> filterChatrooms(List<Chatroom> chatrooms, String searchTerm){
+		 List<Chatroom> filteredChatrooms = new ArrayList<Chatroom>();
+		 outer: for(Chatroom x : chatrooms) {
+			 if(x.getDisplayName().toLowerCase().matches(".*"+searchTerm.toLowerCase()+".*")) {
+				 filteredChatrooms.add(x);
+				 continue outer;
+			 }
+
+			 inner: for(Tag y : x.getTags()) {
+				 if(y.getName().toLowerCase().equals(searchTerm.toLowerCase())) {
+					 filteredChatrooms.add(x);
+					 continue outer;
+				 }
+			 }
+		 }
+		
+		return filteredChatrooms;
 	}
 
 	/**

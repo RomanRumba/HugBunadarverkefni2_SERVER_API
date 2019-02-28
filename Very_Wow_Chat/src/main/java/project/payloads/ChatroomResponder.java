@@ -1,5 +1,6 @@
 package project.payloads;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,7 @@ public class ChatroomResponder {
 		this.listed = listed;
 		this.invited_only = invited_only;
 		this.lastMessageReceived = lastMessageReceived;
-		this.tags = tags;
+		this.tags = tags == null ? new ArrayList<String>() : tags;
 	}
 	// getters
 
