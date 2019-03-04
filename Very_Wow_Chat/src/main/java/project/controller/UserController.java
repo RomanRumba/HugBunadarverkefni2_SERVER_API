@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import project.services.ChatroomService;
@@ -336,8 +337,7 @@ public class UserController {
 	}
 	
 	/**
-	 * GET request to this url will return a list of all the user's friend
-	 * requestees
+	 * GET request to this url will return a list of all the user's chatrooms
 	 * 
 	 * @param username
 	 * @return
@@ -347,9 +347,42 @@ public class UserController {
 		try {
 			User user = userService.findByUsername(username);
 			List<Chatroom> chatrooms = user.getMemberOfChatrooms();
+			// convert chatrooms to memberships
+			List<Membership> memberships = new ArrayList<Membership>();
+			for(Chatroom chatroom : chatrooms) {
+				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+			}
+			// create a list of membershipResponders for json return
+			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
+			
 
-			// create a list of UserResponders for json return
-			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
+	
+	/**
+	 * GET request to this url will return a list of all the user's chatrooms
+	 * 
+	 * @param username
+	 * @return
+	 */
+	@RequestMapping(path = "/memberofchatrooms", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> getMyChatrooms(UsernamePasswordAuthenticationToken token) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			// get the user's chatrooms
+			List<Chatroom> chatrooms = user.getMemberOfChatrooms();
+			// convert chatrooms to memberships
+			List<Membership> memberships = new ArrayList<Membership>();
+			for(Chatroom chatroom : chatrooms) {
+				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+			}
+			// create a list of membershipResponders for json return
+			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
+			
 
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {

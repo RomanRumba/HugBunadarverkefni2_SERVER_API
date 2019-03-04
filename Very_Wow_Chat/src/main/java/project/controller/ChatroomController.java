@@ -1,5 +1,6 @@
 package project.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -184,7 +185,7 @@ public class ChatroomController {
 			UsernamePasswordAuthenticationToken token, @PathVariable String chatroomName) {
 		try {
 			// fetch user from authentication token
-			// User user = userService.findByUsername(token.getName());
+			User user = userService.findByUsername(token.getName());
 			// fetch the chatroom to update
 			Chatroom chatroom = this.chatroomService.findByChatname(chatroomName);
 			// get the new attributes, if provided
@@ -206,8 +207,10 @@ public class ChatroomController {
 			List<String> newTags = newChatroom.getTags();
 			// apply the new tags
 			this.tagService.setTags(chatroom, newTags);
-			// wrap the chatroom data
-			ChatroomResponder body = new ChatroomResponder(chatroom);
+			// prepare membership for return
+			Membership membership = this.chatroomService.getUserMembershipOfChatroom(user, chatroom);
+			// wrap the data to send in json format
+			ChatroomResponder body = new MembershipResponder(membership);
 			// return the chatroom and a 201 status code
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {
@@ -453,8 +456,7 @@ public class ChatroomController {
 		List<Chatroom> chatrooms = chatroomService.getAllListedChatrooms();
 
 		// create a list of ChatroomResponders for json return
-		List<ChatroomResponder> body = chatrooms.stream().map(x -> new ChatroomResponder(x))
-				.collect(Collectors.toList());
+		List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
 
 		return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 
@@ -469,8 +471,7 @@ public class ChatroomController {
 		List<Chatroom> chatrooms = chatroomService.getAllChatrooms();
 
 		// create a list of ChatroomResponders for json return
-		List<ChatroomResponder> body = chatrooms.stream().map(x -> new ChatroomResponder(x))
-				.collect(Collectors.toList());
+		List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
 
 		return new ResponseEntity<>(body, HttpStatus.OK);
 	}
@@ -554,10 +555,14 @@ public class ChatroomController {
 			User user = userService.findByUsername(token.getName());
 			// fetch the chatroom
 			List<Chatroom> chatrooms = this.chatroomService.listedChatroomSearch(searchTerm, user);
-	
-			// create a list of ChatroomResponders for json return
-			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
-	
+			// convert chatrooms to memberships
+			List<Membership> memberships = new ArrayList<Membership>();
+			for(Chatroom chatroom : chatrooms) {
+				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+			}
+			// create a list of membershipResponders for json return
+			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
+			
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {
 			return e.getErrorResponseEntity();
@@ -576,10 +581,14 @@ public class ChatroomController {
 			User user = userService.findByUsername(token.getName());
 			// fetch the chatroom
 			List<Chatroom> chatrooms = this.chatroomService.allChatroomSearch(searchTerm, user);
-	
-			// create a list of ChatroomResponders for json return
-			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
-	
+			// convert chatrooms to memberships
+			List<Membership> memberships = new ArrayList<Membership>();
+			for(Chatroom chatroom : chatrooms) {
+				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+			}
+			// create a list of membershipResponders for json return
+			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
+			
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {
 			return e.getErrorResponseEntity();
