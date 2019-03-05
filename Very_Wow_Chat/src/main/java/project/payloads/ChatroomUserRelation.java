@@ -6,5 +6,7 @@ public enum ChatroomUserRelation {
 	// the user is an admin of the chatroom
 	ADMIN,
 	// the user is a member of the chatroom
-	MEMBER;
+	MEMBER,
+	// the user is not a member of the chatroom
+	NOT_MEMBER;
 }

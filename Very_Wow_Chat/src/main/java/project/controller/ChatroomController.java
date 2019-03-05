@@ -558,7 +558,11 @@ public class ChatroomController {
 			// convert chatrooms to memberships
 			List<Membership> memberships = new ArrayList<Membership>();
 			for(Chatroom chatroom : chatrooms) {
-				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+				try {
+					memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+				}catch(HttpException e) {
+					memberships.add(new Membership(user, chatroom));
+				}
 			}
 			// create a list of membershipResponders for json return
 			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
@@ -584,7 +588,11 @@ public class ChatroomController {
 			// convert chatrooms to memberships
 			List<Membership> memberships = new ArrayList<Membership>();
 			for(Chatroom chatroom : chatrooms) {
-				memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+				try {
+					memberships.add(this.chatroomService.getUserMembershipOfChatroom(user, chatroom));
+				}catch(HttpException e) {
+					memberships.add(new Membership(user, chatroom));
+				}
 			}
 			// create a list of membershipResponders for json return
 			List<MembershipResponder> body = ResponderLister.toMembershipResponderList(memberships);
