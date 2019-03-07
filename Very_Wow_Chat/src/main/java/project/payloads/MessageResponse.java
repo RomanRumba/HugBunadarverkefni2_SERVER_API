@@ -1,5 +1,8 @@
 package project.payloads;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import project.persistance.entities.ChatMessage;
 import project.services.CryptographyService;
 
@@ -27,6 +30,8 @@ public class MessageResponse {
 	private String message;
 
 	private long timestamp;
+	
+	private List<String> resources;
 
 	public long getTimestamp() {
 		return timestamp;
@@ -34,6 +39,14 @@ public class MessageResponse {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+	
+	public List<String> getResources() {
+		return resources;
+	}
+
+	public void setResources(List<String> resources) {
+		this.resources = resources;
 	}
 
 	public String getId() {
@@ -109,6 +122,12 @@ public class MessageResponse {
 	public MessageResponse(String message) {
 		this(null, null, 0, null, null, message, 0);
 	}
+	
+	public MessageResponse(String id, String chatroomName, long senderUsernameId, String senderUsername,
+			String senderDisplayName, String message, long timestamp) {
+		this(id,  chatroomName,  senderUsernameId,  senderUsername,
+			 senderDisplayName,  message,  timestamp, new ArrayList<String>());
+	}
 
 	/**
 	 * Decrypts the encrypted message.
@@ -122,7 +141,7 @@ public class MessageResponse {
 	 * @param timestamp
 	 */
 	public MessageResponse(String id, String chatroomName, long senderUsernameId, String senderUsername,
-			String senderDisplayName, String message, long timestamp) {
+			String senderDisplayName, String message, long timestamp, List<String> resources) {
 		super();
 		this.id = id;
 		this.chatroomName = chatroomName;
@@ -132,11 +151,12 @@ public class MessageResponse {
 		// NOTE: decrypt message here.
 		this.message = CryptographyService.getPlaintext(message);
 		this.timestamp = timestamp;
+		this.resources = resources;
 	}
 
 	public MessageResponse(ChatMessage chatMessage) {
 		this(chatMessage.getId(), chatMessage.getChatroomName(), chatMessage.getSenderUsernameId(),
 				chatMessage.getSenderUsername(), chatMessage.getSenderDisplayName(), chatMessage.getMessage(),
-				chatMessage.getTimestamp());
+				chatMessage.getTimestamp(), chatMessage.getResources());
 	}
 }

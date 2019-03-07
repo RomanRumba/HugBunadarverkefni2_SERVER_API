@@ -1,8 +1,11 @@
 package project.persistance.entities;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * @author Davíð Helgason (dah38@hi.is)
@@ -23,10 +26,27 @@ public class ChatMessage {
 	private String senderDisplayName;
 
 	// @Convert(converter = MessageConverter.class)
+	
 	private String message;
+	
+	/**
+	 * SHA512 strings of uploaded resources.
+	 * 
+	 * null if not in use (I guess...)
+	 */
+	@Field("resources")
+	private List<String> resources;
 
 	@Indexed
 	private Long timestamp;
+	
+	public List<String> getResources() {
+		return resources;
+	}
+
+	public void setResources(List<String> resources) {
+		this.resources = resources;
+	}
 
 	public String getId() {
 		return id;
@@ -69,7 +89,7 @@ public class ChatMessage {
 	}
 
 	public String getMessage() {
-		return message;
+		return message;    
 	}
 
 	public void setMessage(String message) {
@@ -86,11 +106,13 @@ public class ChatMessage {
 
 	@Override
 	public String toString() {
+		// TODO: add resources string
 		return "ChatMessage [id=" + id + ", chatroomName=" + chatroomName + ", senderUsernameId=" + senderUsernameId
 				+ ", senderUsername=" + senderUsername + ", senderDisplayName=" + senderDisplayName + ", message="
 				+ message + ", timestamp=" + timestamp + "]";
 	}
 
+	/*
 	public ChatMessage(String id, String chatroomName, long senderUsernameId, String senderUsername,
 			String senderDisplayName, String message, Long timestamp) {
 		super();
@@ -101,6 +123,20 @@ public class ChatMessage {
 		this.senderDisplayName = senderDisplayName;
 		this.message = message;
 		this.timestamp = timestamp;
+		this.resources = null;
+	}*/
+	
+	public ChatMessage(String id, String chatroomName, long senderUsernameId, String senderUsername,
+			String senderDisplayName, String message, Long timestamp, List<String> resources) {
+		super();
+		this.id = id;
+		this.chatroomName = chatroomName;
+		this.senderUsernameId = senderUsernameId;
+		this.senderUsername = senderUsername;
+		this.senderDisplayName = senderDisplayName;
+		this.message = message;
+		this.timestamp = timestamp;
+		this.resources = resources;
 	}
 
 }

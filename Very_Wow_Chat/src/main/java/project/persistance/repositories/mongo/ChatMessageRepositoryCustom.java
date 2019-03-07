@@ -76,6 +76,16 @@ public interface ChatMessageRepositoryCustom {
 	 * @return List of messages.
 	 */
 	List<ChatMessage> getChatroomMessagesBetweenTime(String chatroomName, long startTime, long endTime);
+	
+	/**
+	 * Returns the chat message with MongoDB ID of <code>id</code> which belongs to
+	 * chat room with name <code>chatroomName<code>.
+	 * 
+	 * @param chatroomName Name of chat room.
+	 * @param id MongoDB ID of document
+	 * @return Chat message
+	 */
+	ChatMessage getChatMessage(String chatroomName, String id);
 
 	/**
 	 * Posts chat message <code>message</code>.

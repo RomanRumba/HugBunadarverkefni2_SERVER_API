@@ -90,6 +90,18 @@ public class MessageService {
 	public void addChatMessage(ChatMessage chatMessage) {
 		chatMessageRepository.addChatMessage(chatMessage);
 	}
+	
+	/**
+	 * 
+	 * @param chatroom
+	 * @param id
+	 * @return
+	 */
+	public ChatMessage getChatMessage(Chatroom chatroom, String id) {
+		ChatMessage chatMessage = chatMessageRepository.getChatMessage(chatroom.getChatroomName(), id);
+		return chatMessage;
+	}
+	
 
 	/**
 	 * Returns the number of messages in chat room <code>chatroom</code>.

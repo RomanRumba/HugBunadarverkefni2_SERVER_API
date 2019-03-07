@@ -3,7 +3,16 @@ management:
     enabled: true
 
 
+
+# spring.servlet.multipart.enabled = false  is temporary
+
 spring:
   resources:
     chain:
       enabled: true
+  servlet:
+    multipart:
+      enabled: false
+      
+      
+      

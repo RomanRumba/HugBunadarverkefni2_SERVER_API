@@ -148,4 +148,23 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
 		return count;
 	}
 
+	@Override
+	public ChatMessage getChatMessage(String chatroomName, String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("chatroomName").is(chatroomName));
+		query.addCriteria(Criteria.where("id").is(id));
+		List<ChatMessage> results = mongoTemplate.find(query, ChatMessage.class);
+		
+		if (results.isEmpty()) {
+			return null;
+		} else if (results.size() > 1) {
+			System.err.println("Unexpected size of results for get chat message: " + results.size());
+			return null;
+		}
+		
+		ChatMessage chatMessage = results.get(0);
+		
+		return chatMessage;
+	}
+
 }
