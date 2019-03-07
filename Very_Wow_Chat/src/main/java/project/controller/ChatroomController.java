@@ -83,7 +83,7 @@ public class ChatroomController {
 		try {
 			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
 			// wrap the data to send in json format
-			ChatroomResponder body = new ChatroomResponder(chatroom);
+			MembershipResponder body = new MembershipResponder(chatroom);
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {
 			return e.getErrorResponseEntity();

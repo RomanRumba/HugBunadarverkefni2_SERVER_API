@@ -58,6 +58,16 @@ public class MembershipResponder extends ChatroomResponder {
 			this.userRelation = ChatroomUserRelation.NOT_MEMBER;
 		}
 	}
+	
+	/**
+	 * Membership for not having a relationship
+	 * @param chatroom
+	 */
+	public MembershipResponder(Chatroom chatroom) {
+		super(chatroom);
+		this.lastRead = null;
+		this.userRelation = ChatroomUserRelation.NOT_MEMBER;
+	}
 
 	public Long getLastRead() {
 		return lastRead;
