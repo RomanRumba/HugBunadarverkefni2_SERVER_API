@@ -346,8 +346,8 @@ public class MessageController {
 			
 			
 		    
-		    // TODO: maybe reintroduce later
-		    if (false) {
+		    // TODO: create a separate database of content type (something like that...)
+		    if (true) {
 		    	Tika tika = new Tika();
 			    String mimeType = tika.detect(file);
 				
@@ -462,6 +462,10 @@ public class MessageController {
 			@RequestBody String chatMessageJsonString, UsernamePasswordAuthenticationToken token) {
 		try {
 			// TODO: fix HttpStatus
+			
+			// TODO: Always return "correct" content-type.
+			
+			// TODO: when uploading, figure out content-type (optional9:
 
 			JsonArray badMessage = new JsonArray();
 
