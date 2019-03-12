@@ -46,14 +46,27 @@ public class MembershipResponder extends ChatroomResponder {
 
 		List<Chatroom> o = user.getOwnedChatrooms();
 		List<Chatroom> a = user.getAdminOfChatrooms();
+		List<Chatroom> m = user.getMemberOfChatrooms();
 		// set the user relation
 		if (o.contains(chatroom)) {
 			this.userRelation = ChatroomUserRelation.OWNER;
 		} else if (a.contains(chatroom)) {
 			this.userRelation = ChatroomUserRelation.ADMIN;
-		} else {
+		} else if (m.contains(chatroom)) {
 			this.userRelation = ChatroomUserRelation.MEMBER;
+		}else {
+			this.userRelation = ChatroomUserRelation.NOT_MEMBER;
 		}
+	}
+	
+	/**
+	 * Membership for not having a relationship
+	 * @param chatroom
+	 */
+	public MembershipResponder(Chatroom chatroom) {
+		super(chatroom);
+		this.lastRead = null;
+		this.userRelation = ChatroomUserRelation.NOT_MEMBER;
 	}
 
 	public Long getLastRead() {
