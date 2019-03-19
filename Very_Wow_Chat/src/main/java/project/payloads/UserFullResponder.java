@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import project.persistance.entities.User;
+import project.services.CryptographyService;
 
 /**
  * This class is for wrapping data in JSON objects
@@ -20,7 +21,7 @@ public class UserFullResponder {
 	public UserFullResponder(User user) {
 		this.username = user.getUsername();
 		this.displayName = user.getDisplayName();
-		this.email = user.getEmail();
+		this.email = CryptographyService.getPlaintext(user.getEmail());
 		this.created = user.getCreated();
 	}
 
