@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.ArrayList;
 import java.util.List;
 
+import project.services.AuthenticationService;
 import project.services.ChatroomService;
 import project.services.CryptographyService;
 import project.services.UserService;
 import project.persistance.entities.User;
 import project.errors.HttpException;
 import project.payloads.ChatroomResponder;
+import project.payloads.HttpResponseBody;
 import project.payloads.MembershipResponder;
 import project.payloads.RelationsResponder;
 import project.payloads.UserFullResponder;
@@ -47,6 +49,13 @@ public class UserController {
 	private ChatroomService chatroomService;
 
 	/**
+	 * This class holds over all the basic functions needed to authenticate or
+	 * validate data received from user
+	 */
+	@Autowired
+	private AuthenticationService authenticator;
+
+	/**
 	 * Update a user's displayName, password, and email
 	 * 
 	 * NOTE: email in <code>newUser</code> is assumed to be unencrypted.
@@ -59,20 +68,44 @@ public class UserController {
 	@RequestMapping(path = "/", method = RequestMethod.PATCH, headers = "Accept=application/json")
 	public ResponseEntity<Object> updateUser(@RequestBody UserUpdateReceiver newUser,
 			UsernamePasswordAuthenticationToken token) {
+
+
+//		System.out.println(newUser.getDisplayName());
+//		System.out.println(newUser.getEmail());
+//		System.out.println(newUser.getPassword());
+//		return new ResponseEntity<>(ResponseWrapper.wrap(newUser), HttpStatus.OK);
 		try {
 			// fetch user from authentication token
 			User user = userService.findByUsername(token.getName());
-			// if an attribute is not given, the old one is used
-			String newDisplayName = newUser.getDisplayName() != null ? newUser.getDisplayName() : user.getDisplayName();
-			// NOTE: encrypt email here.
-			String newEmail = newUser.getEmail() != null ? CryptographyService.getCiphertext(newUser.getEmail())
-					: user.getEmail();
-			String newPassword = newUser.getPassword() != null ? newUser.getPassword() : user.getPassword();
-			// apply the new attributes
-			user.setDisplayName(newDisplayName);
-			user.setPassword(newPassword);
-			user.setEmail(newEmail);
-			// save the changes
+			
+			// if an attribute is not given, it will be null and the attribute will not be updated
+			String newDisplayName = newUser.getDisplayName();
+			String newEmail = newUser.getEmail();
+			String newPassword = newUser.getPassword();
+			
+			// validate user input
+			HttpResponseBody clientResponse = new HttpResponseBody();
+			// no symbols allowed in display name if given
+			if (newDisplayName != null && !authenticator.noSymbolsCheck(newDisplayName)) {
+				clientResponse.addErrorForForm("DisplayName", "Cannot contain spaces or special characters");
+			}
+			// email must be valid if given
+			if (newEmail != null && !authenticator.validEmail(newEmail)) {
+				clientResponse.addErrorForForm("Email", "Email must be of valid form");
+			}
+			// password must be strong
+			if (newPassword != null && !authenticator.validatePass(newPassword)) {
+				clientResponse.addErrorForForm("Password", "Must be atleast 8 characters long");
+				clientResponse.addErrorForForm("Password", "Must contain a upper and a lowercase letter");
+				clientResponse.addErrorForForm("Password", "Must contain a specialcase letter");
+				clientResponse.addErrorForForm("Password", "Cannot contain spaces or tabs");
+			}
+			// if errors exists then we return the errors as the response
+			if (clientResponse.errorsExist()) {
+				return new ResponseEntity<>(clientResponse.getErrorResponse(), HttpStatus.BAD_REQUEST);
+			}
+			
+			// update the user
 			userService.updateUser(user, newDisplayName, newEmail, newPassword);
 			// wrap the data to send in json format
 			UserFullResponder body = new UserFullResponder(user);
