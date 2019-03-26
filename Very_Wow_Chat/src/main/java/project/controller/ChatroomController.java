@@ -79,11 +79,15 @@ public class ChatroomController {
 	 *          message with status code of 404
 	 */
 	@RequestMapping(path = "/{chatroomName}", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<Object> getChatroom(@PathVariable String chatroomName) {
+	public ResponseEntity<Object> getChatroom(@PathVariable String chatroomName,
+			UsernamePasswordAuthenticationToken token) {
 		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
 			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
+			Membership membership = this.chatroomService.getUserMembershipOfChatroom(user, chatroom);
 			// wrap the data to send in json format
-			MembershipResponder body = new MembershipResponder(chatroom);
+			MembershipResponder body = new MembershipResponder(membership);
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
 		} catch (HttpException e) {
 			return e.getErrorResponseEntity();
