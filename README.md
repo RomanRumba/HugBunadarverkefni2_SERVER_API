@@ -13,6 +13,17 @@ This server exposes a REST interface.  The request and responses are JSON object
 Redis is used to store temporary data.  Neo4j is used to store chat rooms, users and tags.  MongoDB is used to store chat messages.
 Chat messages and emails are encrypted.
 
+## Hreinsun
+
+### Hreinsa neo4j
+
+Hreinsa
+`match (n) detach delete n;`
+
+Staðfesta
+`match (n) return n;`
+
+
 ## JAR skrá
 
 Til að keyra verkefnið sem .jar skrá farður þá í möppuna `HugBunadarverkefni2_SERVER_API/Very_Wow_Chat` og keyrðu `mvn package`.  Farðu svo í möppuna `target/` og keyrðu `java -jar Very_Wow_Chat-0.0.1-SNAPSHOT.jar`.

@@ -23,6 +23,9 @@ import project.services.UserService;
  */
 @RestController
 public class TestController {
+	
+	@Autowired
+	private boolean debug;
 
 	@Autowired
 	private ChatroomService chatroomService;
@@ -40,6 +43,8 @@ public class TestController {
 	 */
 	@RequestMapping(value = "/createdata", method = RequestMethod.GET, headers = "Accept=application/json")
 	public void createMockUserRelations() {
+		
+		System.out.println("Creating data...");
 		BCryptPasswordEncoder privateInfoEncoder = new BCryptPasswordEncoder();
 
 		try {
@@ -88,6 +93,8 @@ public class TestController {
 
 			this.chatroomService.joinChatroom(vilhelm, c5);
 			this.chatroomService.acceptAdminInvite(vilhelm, c6);
+			
+			System.out.println("Data created");
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
