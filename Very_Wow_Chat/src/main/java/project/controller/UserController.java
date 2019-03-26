@@ -325,6 +325,28 @@ public class UserController {
 			return e.getErrorResponseEntity();
 		}
 	}
+	
+	/**
+	 * GET request to this url will return a list of all the user's friends
+	 * 
+	 * @param username
+	 * @return
+	 */
+	@RequestMapping(path = "/me/friends", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> getMyFriends(UsernamePasswordAuthenticationToken token) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			List<User> friends = user.getFriends();
+
+			// create a list of UserResponders for json return
+			List<UserResponder> body = ResponderLister.toUserResponderList(friends);
+
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
 
 	/**
 	 * GET request to this url will return a list of all the user's friend requestees
@@ -348,8 +370,30 @@ public class UserController {
 	}
 
 	/**
+	 * GET request to this url will return a list of all the user's friend requestees
+	 * 
+	 * @param username
+	 * @return
+	 */
+	@RequestMapping(path = "/me/friendrequestees", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> getMyFriendRequestees(UsernamePasswordAuthenticationToken token) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			List<User> requestees = user.getFriendRequestees();
+
+			// create a list of UserResponders for json return
+			List<UserResponder> body = ResponderLister.toUserResponderList(requestees);
+
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
+
+	/**
 	 * GET request to this url will return a list of all the user's friend
-	 * requestees
+	 * requestors
 	 * 
 	 * @param username
 	 * @return
@@ -367,6 +411,29 @@ public class UserController {
 		} catch (HttpException e) {
 			return e.getErrorResponseEntity();
 		}
+	}
+
+		/**
+		 * GET request to this url will return a list of all the user's friend
+		 * requestors
+		 * 
+		 * @param username
+		 * @return
+		 */
+		@RequestMapping(path = "/me/friendrequestors")
+		public ResponseEntity<Object> getMyFriendRequestors(UsernamePasswordAuthenticationToken token) {
+			try {
+				// fetch user from authentication token
+				User user = userService.findByUsername(token.getName());
+				List<User> requestors = user.getFriendRequestors();
+
+				// create a list of UserResponders for json return
+				List<UserResponder> body = ResponderLister.toUserResponderList(requestors);
+
+				return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+			} catch (HttpException e) {
+				return e.getErrorResponseEntity();
+			}
 	}
 	
 	/**
@@ -401,7 +468,7 @@ public class UserController {
 	 * @param username
 	 * @return
 	 */
-	@RequestMapping(path = "/memberofchatrooms", method = RequestMethod.GET, headers = "Accept=application/json")
+	@RequestMapping(path = "/me/memberofchatrooms", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<Object> getMyChatrooms(UsernamePasswordAuthenticationToken token) {
 		try {
 			// fetch user from authentication token
@@ -488,10 +555,52 @@ public class UserController {
 	 * @param username
 	 * @return
 	 */
+	@RequestMapping(path = "/me/chatroominvites", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> getMyChatroomInvites(UsernamePasswordAuthenticationToken token) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
+			List<Chatroom> chatrooms = user.getChatroomInvites();
+
+			// create a list of UserResponders for json return
+			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
+
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
+
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 */
 	@RequestMapping(path = "/{username}/chatroomadmininvites", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<Object> getChatroomAdminInvites(@PathVariable String username) {
 		try {
 			User user = userService.findByUsername(username);
+			List<Chatroom> chatrooms = user.getChatroomAdminInvites();
+
+			// create a list of UserResponders for json return
+			List<ChatroomResponder> body = ResponderLister.toChatroomResponderList(chatrooms);
+
+			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
+		} catch (HttpException e) {
+			return e.getErrorResponseEntity();
+		}
+	}
+
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 */
+	@RequestMapping(path = "/me/chatroomadmininvites", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<Object> getMyChatroomAdminInvites(UsernamePasswordAuthenticationToken token) {
+		try {
+			// fetch user from authentication token
+			User user = userService.findByUsername(token.getName());
 			List<Chatroom> chatrooms = user.getChatroomAdminInvites();
 
 			// create a list of UserResponders for json return
