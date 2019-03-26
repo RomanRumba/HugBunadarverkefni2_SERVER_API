@@ -17,6 +17,10 @@ Chat messages and emails are encrypted.
 
 Til að keyra verkefnið sem .jar skrá farður þá í möppuna `HugBunadarverkefni2_SERVER_API/Very_Wow_Chat` og keyrðu `mvn package`.  Farðu svo í möppuna `target/` og keyrðu `java -jar Very_Wow_Chat-0.0.1-SNAPSHOT.jar`.
 
+* `mvn clean package`
+* `cd target`
+* `java -jar Very_Wow_Chat-0.0.1-SNAPSHOT.jar`
+
 ## Introduction
 The project is split into three parts 
 
