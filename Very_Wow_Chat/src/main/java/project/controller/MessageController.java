@@ -2,6 +2,7 @@ package project.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -72,7 +72,7 @@ public class MessageController {
 
 	@Autowired
 	protected ContentAddressableStorageService cass;
-	
+
 	@Value("${content.directory}")
 	private String fileDirectory;
 
@@ -293,105 +293,171 @@ public class MessageController {
 			return e.getErrorResponseEntity();
 		}
 	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@RequestMapping(path = "/{chatroomName}/message/{id}/{res}", method = RequestMethod.GET, headers = "Accept=*/*")
 	public void getResourceByHashAndId(@PathVariable String chatroomName, @PathVariable String id,
-			@PathVariable String res, UsernamePasswordAuthenticationToken token, HttpServletResponse httpServletResponse) {
-		
-		String hash = res;
-		
+			@PathVariable String res, UsernamePasswordAuthenticationToken token,
+			HttpServletResponse httpServletResponse) {
+
+		// The resource `res` that is being requested is a hash value.
+		final String hash = res;
+
+		// `id` is the ID of the MongoDB message.
+
 		System.out.println("id: " + id);
 		System.out.println("hash: " + hash);
-		
-		
+
+		// Find user name based off of JWT token.
+		User user;
+		try {
+			user = userService.findByUsername(token.getName());
+		} catch (NotFoundException e) {
+			try {
+				httpServletResponse.sendError(401, "Unauthorized user");
+				httpServletResponse.flushBuffer();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+
+			return;
+		}
+
+		// Get chat room from chat room name.
+		Chatroom chatroom;
+		try {
+			chatroom = chatroomService.findByChatname(chatroomName);
+		} catch (NotFoundException e1) {
+			e1.printStackTrace();
+			try {
+				httpServletResponse.sendError(404, "Chatroom not found");
+				httpServletResponse.flushBuffer();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+			return;
+		}
+
+		if (!chatroomService.isMember(user, chatroom)) {
+			try {
+				httpServletResponse.sendError(404, "Unauthorized: use is not member of chat room.");
+				httpServletResponse.flushBuffer();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
+
+		ChatMessage chatMessage = messageService.getChatMessage(chatroom, id);
+
+		List<String> resources = chatMessage.getResources();
+
+		if (!resources.contains(hash)) {
+			try {
+				httpServletResponse.sendError(401, "Unauthorized: not allowed to request resources");
+				httpServletResponse.flushBuffer();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+
+		String path = Paths.get(fileDirectory, hash).toString();
+
+		File file = new File(path);
+
+		InputStream is;
+
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			try {
+				httpServletResponse.sendError(404, "Unable to find resource: " + hash);
+				httpServletResponse.flushBuffer();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+			return;
+		}
+
+		// TODO: create a separate database of content type (something like that...)
+
+		Tika tika = new Tika();
+		String mimeType;
+		try {
+			mimeType = tika.detect(file);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+
+			// I read on Stack Exchange if you don't know the MIME type
+			// then slap this label on it!
+			mimeType = "application/octet-stream";
+		}
+
+		httpServletResponse.addHeader("Content-Type", mimeType);
+
+		ServletOutputStream servletOutputStream;
 		
 		try {
-			// Find user name based off of JWT token.
-			User user = userService.findByUsername(token.getName());
-			
-			// Get chat room from chat room name.
-			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
-			
-			if (!chatroomService.isMember(user, chatroom)) {
-				httpServletResponse.sendError(404, "Unauthorized");
+			servletOutputStream = httpServletResponse.getOutputStream();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			try {
+				httpServletResponse.sendError(500, "Can not establish output stream to client.");
 				httpServletResponse.flushBuffer();
-				System.err.println("User isn't member of chatroom");
-				return;
+			} catch (IOException e2) {
+				e2.printStackTrace();
 			}
-			
-			ChatMessage chatMessage = messageService.getChatMessage(chatroom, id);
-			
-			List<String> resources = chatMessage.getResources();
-			
-			
-			if (!resources.contains(hash)) {
-				httpServletResponse.sendError(404, "Unauthorized");
-				httpServletResponse.flushBuffer();
-				System.err.println("Hash doesn't exist");
-				return;
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			
-			String path = Paths.get(fileDirectory, hash).toString();
-			
-			
-			
-			File file = new File(path);
-			
-			InputStream is = new FileInputStream(file);
-			
-			// TODO: check if file exists
-			
-			
-		    
-		    // TODO: maybe reintroduce later
-		    if (false) {
-		    	Tika tika = new Tika();
-			    String mimeType = tika.detect(file);
-				
-				//String mimeType = Files.probeContentType(file.toPath());
-				httpServletResponse.addHeader("Content-Type", mimeType);
-				System.out.println("MimeType: " + mimeType);
-		    }
-			
-			
-			
-			ServletOutputStream servletOutputStream = httpServletResponse.getOutputStream();
-			
-			boolean success = false;
-			
-			
-			if (file.exists()) {
-				
-				
-				
-				
-			    // copy it to response's OutputStream
+			return;
+		}
+
+		boolean success = false;
+
+		if (file.exists()) {
+
+			// copy it to response's OutputStream
+			try {
 				IOUtils.copy(is, servletOutputStream);
 				success = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
-			
-			
-			
-			if (!success) {
+		}
+
+		if (!success) {
+			try {
 				httpServletResponse.sendError(404, "Resource not found");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+		}
+		try {
 			httpServletResponse.flushBuffer();
-			
-		} catch (NotFoundException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		
+		try {
+			is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		
+
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -463,6 +529,10 @@ public class MessageController {
 		try {
 			// TODO: fix HttpStatus
 
+			// TODO: Always return "correct" content-type.
+
+			// TODO: when uploading, figure out content-type (optional9:
+
 			JsonArray badMessage = new JsonArray();
 
 			// Find user name based off of JWT token.
@@ -504,8 +574,7 @@ public class MessageController {
 
 				if (!attachmentsje.isJsonArray()) {
 					badMessage.add("Attachments must be an array");
-					return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()),
-							HttpStatus.BAD_REQUEST);
+					return new ResponseEntity<>(ResponseWrapper.badWrap(badMessage.toString()), HttpStatus.BAD_REQUEST);
 				}
 
 				JsonArray attachmentsja = attachmentsje.getAsJsonArray();

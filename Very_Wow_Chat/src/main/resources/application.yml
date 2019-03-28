@@ -3,7 +3,6 @@ management:
     enabled: true
 
 
-
 # spring.servlet.multipart.enabled = false  is temporary
 
 spring:
@@ -13,6 +12,3 @@ spring:
   servlet:
     multipart:
       enabled: false
-      
-      
-      
