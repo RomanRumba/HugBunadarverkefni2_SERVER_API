@@ -75,6 +75,10 @@ public class ChatroomService {
 	 * @throws NotFoundException if chatroomName doesn't belong to any chatroom
 	 */
 	public Chatroom findByChatname(String chatroomName) throws NotFoundException {
+		// throw error if no chatroomName given
+		if(chatroomName == null || chatroomName.length() == 0) {
+			throw new NotFoundException("No chatroom name given");
+		}
 		// throw error if user doesn't exist
 		if (!chatroomExists(chatroomName)) {
 			throw new NotFoundException("Chatroom not found");
