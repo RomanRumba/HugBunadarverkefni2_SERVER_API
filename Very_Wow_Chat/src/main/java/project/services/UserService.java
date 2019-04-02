@@ -131,6 +131,10 @@ public class UserService {
 	 */
 	@Transactional(readOnly = true)
 	public User findByUsername(String username) throws NotFoundException {
+		// throw error if no username given
+		if(username == null || username.length()  == 0) {
+			throw new NotFoundException("No username given");
+		}
 		// throw error if user doesn't exist
 		if (!userExistsAndActive(username)) {
 			throw new NotFoundException("User not found");
