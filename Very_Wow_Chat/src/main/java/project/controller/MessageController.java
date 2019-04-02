@@ -623,6 +623,16 @@ public class MessageController {
 					}
 				}
 			}
+			
+			if (chatMessage.has("attachment")) {
+				JsonElement attachment = chatMessage.get("attachment");
+				String value = attachment.getAsString();
+
+				byte[] valueBytes = DatatypeConverter.parseBase64Binary(value);
+
+				String hex = cass.storeBytes(valueBytes);
+				resourcesAL.add(hex);
+			}
 
 			long timestamp = System.currentTimeMillis();
 
