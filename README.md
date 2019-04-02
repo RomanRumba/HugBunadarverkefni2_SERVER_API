@@ -15,6 +15,17 @@ Chat messages and emails are encrypted.
 
 ## Hreinsun
 
+### Hreinsa Mongo
+
+Keyrðu `mongod`
+
+keyrðu `mongo very_wow_chat`
+
+keyrðu `show collections`
+
+`db.chatMessage.drop()`
+
+
 ### Hreinsa neo4j
 
 Hreinsa
@@ -23,6 +34,13 @@ Hreinsa
 Staðfesta
 `match (n) return n;`
 
+## Búa til gögn
+
+keyrðu serverinn
+
+keyrðu
+
+`curl http://127.0.0.1:9090/createdata`
 
 ## JAR skrá
 

@@ -23,9 +23,6 @@ import project.services.UserService;
  */
 @RestController
 public class TestController {
-	
-	@Autowired
-	private boolean debug;
 
 	@Autowired
 	private ChatroomService chatroomService;
