@@ -85,7 +85,12 @@ public class ChatroomController {
 			// fetch user from authentication token
 			User user = userService.findByUsername(token.getName());
 			Chatroom chatroom = chatroomService.findByChatname(chatroomName);
-			Membership membership = this.chatroomService.getUserMembershipOfChatroom(user, chatroom);
+			Membership membership;
+			try {
+				membership = this.chatroomService.getUserMembershipOfChatroom(user, chatroom);
+			}catch(HttpException e) {
+				membership = new Membership(user, chatroom);
+			}
 			// wrap the data to send in json format
 			MembershipResponder body = new MembershipResponder(membership);
 			return new ResponseEntity<>(ResponseWrapper.wrap(body), HttpStatus.OK);
