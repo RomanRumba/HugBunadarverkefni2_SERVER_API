@@ -248,6 +248,8 @@ public class AccountController {
 		// back
 		return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 	}
+	
+
 
 	/**
 	 * Usage: url/validation/{key}
@@ -262,7 +264,7 @@ public class AccountController {
 	 * 
 	 * @return No response.
 	 */
-	@RequestMapping(path = "/validation/{key}", method = RequestMethod.PUT, headers = "Accept=application/json")
+	@RequestMapping(path = "/validation/{key}", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<String> validateUser(@PathVariable String key) {
 		// the explanation for this is above in the login controller line : 74
 		HttpResponseBody clientResponse = new HttpResponseBody();
